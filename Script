@@ -1,1 +1,346 @@
-print(z)
+--AUTO VOTING MAP SCRIPT
+
+local votingoptions = game.Players.LocalPlayer.PlayerGui.GameGui.VoteMap.Window.Content.MainVotes
+local votemenu = game.Players.LocalPlayer.PlayerGui.GameGui.VoteMap
+local debounce =  false
+local indexreference = 1
+local firstattempt = true
+local firstrun = true
+local vv, zz = nil, nil
+local counter = 1
+
+--Getting map number
+function getmapnumber()
+    for ii, vv in pairs (pickmaprotation) do
+    for i, v in pairs(votingoptions:GetChildren()) do
+        if v:IsA('Frame') then
+            wait()
+            print("GAME: ".. v:FindFirstChild('MapName',true).Text .. "      ROATATION: " .. vv)
+            --To see if script recognised the match
+            if v:FindFirstChild('MapName',true).Text == vv then
+                print('This Script Matched the Last GAME/ROATION')
+            end
+           if v:FindFirstChild('VoteAction',true).Visible == true then
+                print("THIS MATCH HAS COOLDOWN ON")
+            end
+            if v:FindFirstChild('MapName',true).Text == vv and v:FindFirstChild('VoteAction',true).Visible == false then
+                indexreference = indexreference + 1
+                print('Last match was non-visible')
+                if indexreference == (#pickmaprotation) then
+                indexreference = 1
+                end
+                return tonumber(v.Name)
+            elseif v:FindFirstChild('MapName',true).Text == vv and v:FindFirstChild('VoteAction',true).Visible == true then
+                indexreference = indexreference + 1
+                print('Visible')
+            end
+        end
+    end
+    end
+    if tonumber(indexreference) >= tonumber(#pickmaprotation) then
+        indexreference = 1
+    end
+    return false
+end
+
+
+--Trigger voting
+function vote()
+    local mapnumber = getmapnumber()
+    if mapnumber == false then
+        print("Could'nt find selected map(s) on this roster. Is the game on the right difficulty?")
+        return
+    else
+    local args = {
+    [1] = -game:GetService("ReplicatedStorage").Remote.ReqPasskey:InvokeServer(),
+    [2] = mapnumber,
+    [3] = 0
+    }
+    game:GetService("ReplicatedStorage").Remote.UpdMapVote:FireServer(unpack(args))
+    end
+end
+
+
+--Search for open vote menu
+local detect = votemenu:GetPropertyChangedSignal('Visible'):Connect(function(vis)
+    if debounce == false then
+        debounce = true
+        wait(.5)
+        if votemenu.Visible == true then
+        print('Vote Menu Open, Voting...')
+        vote()
+        end
+        debounce = false
+    end
+end)
+
+
+
+
+--xnv42 OLD TAS EXCECUTION SCRIPT
+
+function tas()
+
+
+f = game:GetService("HttpService"):JSONDecode(readfile("./tas/".. TasLocation .. ".json")) 
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+
+local animsenv = getsenv(LocalPlayer.Character.Animate)
+local oldPlayAnimation = animsenv.playAnimation
+
+ReplicatedStorage.Remote.StartClientMapTimer.OnClientEvent:Wait()
+
+local spawn = workspace.Multiplayer.Map:FindFirstChild("Spawn", true)
+local o = Vector3.new(spawn.Position.X, spawn.Position.Y - 1000, spawn.Position.Z)
+local timeStart = os.clock()
+local currentButton = 0
+local Alert = getsenv(LocalPlayer.PlayerScripts.CL_MAIN_GameScript).newAlert
+
+animsenv.playAnimation = function() end
+
+local diedEvent = LocalPlayer.Character.Humanoid.Died:Connect(function()
+    RunService:UnbindFromRenderStep("progressTAS")
+    Alert("TAS Playback Abandoned", Color3.new(1, 0.5, 0.5))
+end)
+
+local prevAnimationId = -1
+
+local familiarglitchbypasstime = time()
+RunService:BindToRenderStep("progressTAS", 150, function()
+
+    local off = os.clock() - timeStart
+    local prog = nil
+    local j = 2
+    
+    for i=2, #f do
+        if f[i].time > off then
+            prog = 1 - ((f[i].time - off) / (f[i].time - f[i-1].time))
+            j = i
+            break
+        end
+    end
+
+    --[[local i = math.ceil(#f / 2)
+    for k=1, 64 do
+        if f[i] == nil then i = i - 1 end
+        if f[i-1] == nil then i = i + 1 end
+        if f[i].time >= off and f[i-1].time <= off then
+            prog = 1 - ((f[i].time - off) / (f[i].time - f[i-1].time))
+            j = i
+            break
+        else
+            if f[i].time >= off then
+                i = i - math.ceil(#f / (2^(k+1)))
+            else
+                i = i + math.floor(#f / (2^(k+1)))
+            end
+        end
+    end]]
+
+    if prog == nil then 
+        RunService:UnbindFromRenderStep("progressTAS")
+        Alert("TAS Playback Completed!", Color3.new(0,1,1))
+        animsenv.playAnimation = oldPlayAnimation
+        diedEvent:Disconnect()
+        return
+    end
+
+
+
+    local p = f[j-1]
+
+    local rootCFrame = CFrame.new(
+        p.rootCFrame[1] / 1e3,
+        p.rootCFrame[2] / 1e3,
+        p.rootCFrame[3] / 1e3
+    ) * CFrame.Angles(
+        p.rootCFrame[4] / 1e3,
+        p.rootCFrame[5] / 1e3,
+        p.rootCFrame[6] / 1e3
+    ) + o
+
+    local rootVelocity = Vector3.new(
+        p.rootVelocity[1] / 1e3,
+        p.rootVelocity[2] / 1e3,
+        p.rootVelocity[3] / 1e3
+    )
+
+    local CameraCFrame = CFrame.new(
+        p.CameraCFrame[1] / 1e3,
+        p.CameraCFrame[2] / 1e3,
+        p.CameraCFrame[3] / 1e3
+    ) * CFrame.Angles(
+        p.CameraCFrame[4] / 1e3,
+        p.CameraCFrame[5] / 1e3,
+        p.CameraCFrame[6] / 1e3
+    ) + o
+
+    local Animation = p.Animation
+    if p.Animation[1] == "idle" then
+        p.Animation[2] = 0.3
+    elseif p.Animation[1] == 'walk' or p.Animation[1] == 'jump' or p.Animation[1] == 'customemote' then
+        p.Animation[2] = 0.1 
+    elseif p.Animation[1] == 'fall' then
+        p.Animation[2] = 0.3
+    end
+
+    local AnimationId = p.AnimationId
+
+    if currentButton < #p.buttonsPressed then
+        local bPos = p.buttonsPressed[#p.buttonsPressed]
+        bPos = Vector3.new(bPos[1] / 1e3, bPos[2] / 1e3, bPos[3] / 1e3) + o
+
+        for k,v in ipairs(workspace.Multiplayer:WaitForChild('Map'):GetDescendants()) do
+            if v:IsA("Part") and v:FindFirstChild("TouchInterest") ~= nil and (bPos - v.Position).magnitude < 0.1 then
+                coroutine.wrap(function()
+                    firetouchinterest(LocalPlayer.Character.HumanoidRootPart, v, 0)
+                    wait(0.2)
+                    firetouchinterest(LocalPlayer.Character.HumanoidRootPart, v, 1)
+                end)()
+                currentButton = #p.buttonsPressed
+                break
+            end
+        end
+    end
+
+
+
+    local q = f[j]
+
+    rootCFrame = rootCFrame:Lerp(
+        CFrame.new(
+            q.rootCFrame[1] / 1e3,
+            q.rootCFrame[2] / 1e3,
+            q.rootCFrame[3] / 1e3
+        ) * CFrame.Angles(
+            q.rootCFrame[4] / 1e3,
+            q.rootCFrame[5] / 1e3,
+            q.rootCFrame[6] / 1e3
+        ) + o, prog
+    )
+
+    rootVelocity = rootVelocity:Lerp(
+        Vector3.new(
+            q.rootVelocity[1] / 1e3,
+            q.rootVelocity[2] / 1e3,
+            q.rootVelocity[3] / 1e3
+        ), prog
+    )
+
+    CameraCFrame = CameraCFrame:Lerp(
+        CFrame.new(
+            q.CameraCFrame[1] / 1e3,
+            q.CameraCFrame[2] / 1e3,
+            q.CameraCFrame[3] / 1e3
+        ) * CFrame.Angles(
+            q.CameraCFrame[4] / 1e3,
+            q.CameraCFrame[5] / 1e3,
+            q.CameraCFrame[6] / 1e3
+        ) + o, prog
+    )
+
+    LocalPlayer.Character.HumanoidRootPart.CFrame = rootCFrame
+    LocalPlayer.Character.HumanoidRootPart.Velocity = rootVelocity
+    workspace.CurrentCamera.CFrame = CameraCFrame
+
+    if AnimationId > prevAnimationId then
+        oldPlayAnimation(Animation[1], Animation[2], LocalPlayer.Character.Humanoid)
+        prevAnimationId = AnimationId
+    end
+
+    if TasLocation:find('Familiar Ruins') and firstrun then
+        if time() - familiarglitchbypasstime >= 3 then
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(spawn.Position.X, spawn.Position.Y, spawn.Position.Z)
+        else firstrun = false
+        end
+    end
+
+        if counter >= 21 then
+            game.Players.LocalPlayer.Character.Head:Destroy()
+        end
+
+
+end)
+
+
+end
+
+
+
+
+
+--LISTENER
+
+--tas excecutioner based on map instancing and tas file finder (tas file names must have the exact same characters as actual ingame maps otherwise it wont play)
+function idle()
+
+while wait() do
+
+if workspace.Multiplayer:WaitForChild('Map').Name ~= ' ' then
+local z = workspace.Multiplayer:WaitForChild('Map'):FindFirstChild('MapName',true).Value
+    --if in the future you for some reason need z as the original value then just create another varible like zz that gets rid of the - while the original keeps the value
+    if z:find('-') then
+        z = string.gsub(z,"-",' ')
+    end
+
+for i, v in pairs(TasNames) do
+    if v:find('-') then
+        local vv = string.gsub(v,'-',' ')
+        if vv:find(z) then
+            TasLocation = tostring(v)
+            print("FileName: " .. v .. "   MapName: " .. z)
+            return
+        end
+    end
+    
+if v:find(z) then
+    TasLocation = tostring(v)
+    print("FileName: " .. v .. "   MapName: " .. z)
+    return
+
+--[[elseif v:find('Dark Sci') and v:find('Facility') then
+     -- print('\nDARK SCI FIX! (any map name with a dash will break the script!)\n')
+    --TasLocation = tostring(v)
+    --print("FileName: " .. v .. "   MapName: " .. z)
+    --return ]]
+end
+end
+end
+end
+end
+
+
+
+
+--VIP SERVER FIX
+if vipserverfix then
+game.Players.LocalPlayer.CharacterAdded:Connect(function(p)
+wait(.4)
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-26, -147.45, 48.5)
+game.Players.LocalPlayer.Character.Humanoid:MoveTo(Vector3.new(-25.7011, -144.447, 70.1652))
+wait(3)
+if game:GetService("Players").LocalPlayer.PlayerGui.GameGui.Waiting.Visible == true then
+    wait()
+    firesignal(game:GetService("Players").LocalPlayer.PlayerGui.GameGui.Waiting.UI.Content.Buttons.MapVote.MouseButton1Click)
+end
+keypress(0x57)
+wait()
+keyrelease(0x57)
+end)
+end
+
+
+
+--infinite loop (must leave game for script to break)
+while wait() do
+idle()
+print('STARTING TA.S...')
+tas()
+counter = counter + 1
+workspace.Multiplayer:WaitForChild('Map').Name  = ' '
+end
