@@ -1,4 +1,4 @@
---[[AUTO VOTING MAP SCRIPT
+--AUTO VOTING MAP SCRIPT
 
 local votingoptions = game.Players.LocalPlayer.PlayerGui.GameGui.VoteMap.Window.Content.MainVotes
 local votemenu = game.Players.LocalPlayer.PlayerGui.GameGui.VoteMap
@@ -344,4 +344,3 @@ tas()
 counter = counter + 1
 workspace.Multiplayer:WaitForChild('Map').Name  = ' '
 end
-]]
