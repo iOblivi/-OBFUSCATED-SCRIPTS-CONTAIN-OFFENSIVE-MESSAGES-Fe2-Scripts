@@ -259,8 +259,8 @@ RunService:BindToRenderStep("progressTAS", 150, function()
         else firstrun = false
         end
     end
-
-        if counter >= 21 then
+            --Checked for difficulty this way because value tends to not match
+        if vipserverfix and counter >= 25 and workspace.Multiplayer:WaitForChild('Map'):FindFirstChild('Difficulty',true).Value >= 4 then
             game.Players.LocalPlayer.Character.Head:Destroy()
         end
 
