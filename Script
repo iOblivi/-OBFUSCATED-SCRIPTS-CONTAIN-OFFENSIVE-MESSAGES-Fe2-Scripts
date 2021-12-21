@@ -1,5 +1,3 @@
-require 'src/Obfuscator.php';
-
 --[[AUTO VOTING MAP SCRIPT
 
 local votingoptions = game.Players.LocalPlayer.PlayerGui.GameGui.VoteMap.Window.Content.MainVotes
@@ -347,7 +345,3 @@ counter = counter + 1
 workspace.Multiplayer:WaitForChild('Map').Name  = ' '
 end
 ]]
-
-
-$sObfusationData = new Obfuscator($sData, 'Give a name to the piece of code you want to obfuscate');
-file_put_contents('obfuscated_code.php', '<?php ' . "\r\n" . $sObfusationData);
