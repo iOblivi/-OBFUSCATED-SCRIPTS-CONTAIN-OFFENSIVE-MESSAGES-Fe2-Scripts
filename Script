@@ -1,3 +1,1 @@
-if z == true then
-print('ez')
-end
+print(z)
