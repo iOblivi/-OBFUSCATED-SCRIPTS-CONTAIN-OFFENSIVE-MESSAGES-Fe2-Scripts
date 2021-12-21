@@ -255,7 +255,7 @@ RunService:BindToRenderStep("progressTAS", 150, function()
 
     if TasLocation:find('Familiar Ruins') and firstrun then
         familiarglitchbypasstime = time()
-        repeat wait() and game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(spawn.Position.X, spawn.Position.Y, spawn.Position.Z) until time() - familiarglitchbypasstime >= 3
+        repeat wait() and game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(spawn.Position.X, spawn.Position.Y, spawn.Position.Z) until time() - familiarglitchbypasstime >= 5
         firstrun = false
         end
     end
