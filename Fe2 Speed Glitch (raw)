@@ -1,0 +1,35 @@
+getgenv().sgSpeed = 40
+
+local Humanoid = game:GetService("Players").LocalPlayer.Character.Humanoid
+local userInput = game:GetService("UserInputService")
+local State
+local validity = true
+local landed = true
+local Humanoid = game:GetService("Players").LocalPlayer.Character.Humanoid
+local OldIndex = nil
+
+OldIndex = hookmetamethod(game, "__index", function(...)
+    local Self, Key = ...
+    if not checkcaller() and Self == Humanoid and Key == 'WalkSpeed' then
+        return 20
+    end
+
+    return OldIndex(...)
+end)
+wait(2)
+Humanoid.StateChanged:Connect(function(old,new)
+    if (new == Enum.HumanoidStateType.Jumping or new == Enum.HumanoidStateType.Freefall) then
+        landed = false
+    elseif new == Enum.HumanoidStateType.Landed then
+        landed = true
+    end
+end)
+game:GetService('RunService').RenderStepped:Connect(function()
+    if (userInput:IsKeyDown(Enum.KeyCode.D) or userInput:IsKeyDown(Enum.KeyCode.A)) then
+        if landed == false then
+            Humanoid.WalkSpeed = getgenv().sgSpeed
+        end
+    else
+        Humanoid.WalkSpeed = 20
+    end
+end)
